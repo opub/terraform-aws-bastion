@@ -16,10 +16,6 @@ setfacl -Rdm other:0 /var/log/bastion
 # Make OpenSSH execute a custom script on logins
 echo -e "\\nForceCommand /usr/bin/bastion/shell" >> /etc/ssh/sshd_config
 
-# Block some SSH features that bastion host users could use to circumvent the solution
-awk '!/X11Forwarding/' /etc/ssh/sshd_config > temp && mv temp /etc/ssh/sshd_config
-echo "X11Forwarding no" >> /etc/ssh/sshd_config
-
 mkdir /usr/bin/bastion
 
 cat > /usr/bin/bastion/shell << 'EOF'
@@ -30,12 +26,6 @@ if [[ -z $SSH_ORIGINAL_COMMAND ]]; then
   # The format of log files is /var/log/bastion/YYYY-MM-DD_HH-MM-SS_user
   LOG_FILE="`date --date="today" "+%Y-%m-%d_%H-%M-%S"`_`whoami`"
   LOG_DIR="/var/log/bastion/"
-
-  # Print a welcome message
-  echo ""
-  echo "NOTE: This SSH session will be recorded"
-  echo "AUDIT KEY: $LOG_FILE"
-  echo ""
 
   # I suffix the log file name with a random string. I explain why later on.
   SUFFIX=`mktemp -u _XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX`
@@ -73,7 +63,7 @@ awk '!/proc/' /etc/fstab > temp && mv temp /etc/fstab
 echo "proc /proc proc defaults,hidepid=2 0 0" >> /etc/fstab
 
 # Restart the SSH service to apply /etc/ssh/sshd_config modifications.
-service sshd restart
+systemctl restart sshd.service
 
 ############################
 ## EXPORT LOG FILES TO S3 ##
