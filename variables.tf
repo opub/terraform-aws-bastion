@@ -57,6 +57,10 @@ variable "bastion_launch_configuration_name" {
   default     = "lc"
 }
 
+variable "bastion_ami" {
+  description = "ID of AMI to use when creating bastion"
+}
+
 variable "elb_subnets" {
   type        = list(string)
   description = "List of subnet were the ELB will be deployed"
